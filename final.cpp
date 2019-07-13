@@ -1,4 +1,4 @@
-#include "stdafx.h"
+Ôªø#include "stdafx.h"
 #include <curses.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -65,16 +65,19 @@ int main()
 	x = w / 2;
 
 	start_color();
-	init_pair(1, COLOR_YELLOW, COLOR_BLACK);	// êF1 ÇÕçïínÇ…â©ï∂éö
-	init_pair(2, COLOR_MAGENTA, COLOR_BLUE);	// êF2 ÇÕê¬ínÇ…É}É[ÉìÉ^ï∂éö
-	init_pair(3, COLOR_BLACK, COLOR_WHITE);		// êF3 ÇÕîíínÇ…çïï∂éö
+	init_pair(1, COLOR_YELLOW, COLOR_BLACK);	// Ëâ≤1 „ÅØÈªíÂú∞„Å´ÈªÑÊñáÂ≠ó
+	init_pair(2, COLOR_MAGENTA, COLOR_BLUE);	// Ëâ≤2 „ÅØÈùíÂú∞„Å´„Éû„Çº„É≥„ÇøÊñáÂ≠ó
+	init_pair(3, COLOR_BLACK, COLOR_WHITE);		// Ëâ≤3 „ÅØÁôΩÂú∞„Å´ÈªíÊñáÂ≠ó
 	bkgd(COLOR_PAIR(1));
 
-	time_t t1, t2, t3;	//É^ÉCÉ}Å[ã@î\
+	time_t t1, t2, t3;	//„Çø„Ç§„Éû„ÉºÊ©üËÉΩ
 	while (1) {
+		TITLE:
 		Title();
 		mvaddstr(25, 40, "START -> Press [S] Button");
-
+		GetPrivateProfileString(section, keyWord, "none", keyValue, CHARBUFF, settingFile);
+		a = atoi(keyValue);
+		mvprintw(28, 40, "BestTime = %d", a);
 		while (1) {
 			key = getch();
 			if (key == 's') {
@@ -84,7 +87,7 @@ int main()
 			}
 		}
 	START:
-		time(&t1);		//ÉXÉ^Å[ÉgéûçèÇãLâØ
+		time(&t1);		//„Çπ„Çø„Éº„ÉàÊôÇÂàª„ÇíË®òÊÜ∂
 		iniLine();
 		while (1) {
 			t++;
@@ -116,7 +119,7 @@ int main()
 			}
 			switch (key) {
 			case KEY_UP:	if (y > 0) { y--; erase(); }
-							break;		//ÉLÅ[ëÄçÏÇÃÇΩÇ—Ç…t2ÇçXêV
+							break;		//„Ç≠„ÉºÊìç‰Ωú„ÅÆ„Åü„Å≥„Å´t2„ÇíÊõ¥Êñ∞
 			case KEY_DOWN:	if (y < h - 1) { y++; erase(); }
 							break;
 			case KEY_LEFT:	if (x > 0) { x--;  erase(); }
@@ -126,7 +129,7 @@ int main()
 				erase();
 			}
 							break;
-			case 'a':		//[A]É{É^ÉìÇâüÇ∑éÊÉäÉgÉâÉC
+			case 'a':		//[A]„Éú„Çø„É≥„ÇíÊäº„ÅôÂèñ„É™„Éà„É©„Ç§
 				check = 0;
 				str = "@";
 				bkgd(COLOR_PAIR(1));
@@ -165,9 +168,9 @@ int main()
 			mvaddstr(bx, by, etr2);
 			if ((x == sx1 && (y <= sy1 || y > sy1 + 10)) || ((x <= sx2 || x > sx2 + 15) && y == sy2)) {
 				check = 1;
-				
+
 			}
-			if ((x == ay && y == ax) && ((etr1=="#"))) {
+			if ((x == ay && y == ax) && ((etr1 == "#"))) {
 				cnt++;
 				etr1 = " ";
 			}
@@ -175,7 +178,7 @@ int main()
 				cnt++;
 				etr2 = " ";
 			}
-			
+
 			if (cnt == 3) {
 				check = 2;
 			}
@@ -190,7 +193,33 @@ int main()
 				goto CLEAR;
 			}
 		}
-		OVER:
+	CLEAR:
+		while (1) {
+			str = " ";
+			bkgd(COLOR_PAIR(2));
+			disClear();
+			//„Éô„Çπ„Éà„Çø„Ç§„É†„Å†„Å£„ÅüÂ†¥Âêà„Å´ini„Å´Êõ∏„ÅçËæº„ÇÄ
+			cleartime = t2 - t1;
+			char clear_data[CHARBUFF];
+			sprintf_s(clear_data, "%d", cleartime);
+			GetPrivateProfileString(section, keyWord, "none", keyValue, CHARBUFF, settingFile);
+			a = atoi(keyValue);
+			if (cleartime < a || a == NULL) {
+				WritePrivateProfileString(section, keyWord, clear_data, settingFile);
+			}
+
+			mvprintw(25, 36, "time = %d", (t2 - t1));
+			mvaddstr(28, 36, "RETRY -> Press [A] Button");
+			check = 0;
+			key = getch();
+			if (key == 'a') {
+				bkgd(COLOR_PAIR(1));
+				str = "@";
+				cnt = 0;
+				goto TITLE;
+			}
+		}
+	OVER:
 		while (1) {
 			str = " ";
 			bkgd(COLOR_PAIR(3));
@@ -204,35 +233,21 @@ int main()
 				bkgd(COLOR_PAIR(1));
 				str = "@";
 				cnt = 0;
-				goto START;
+				goto TITLE;
 			}
 		}
-		CLEAR:
-		while (1) {
-			str = " ";
-			bkgd(COLOR_PAIR(2));
-			disClear();
-			mvprintw(25, 36, "time = %d", (t2 - t1));
-			mvaddstr(28, 36, "RETRY -> Press [A] Button");
-			check = 0;
-			key = getch();
-			if (key == 'a') {
-				bkgd(COLOR_PAIR(1));
-				str = "@";
-				goto START;
-			}
-		}
+	
 	}
 	endwin();
 	return (0);
 }
 
-//ècñ_ÇÃï`âÊ
+//Á∏¶Ê£í„ÅÆÊèèÁîª
 void Writingline1(int a, int b) {
 	int i, h, w;
 	getmaxyx(stdscr, h, w);
 	for (i = 0; i < h; i++) {
-		if ((a<10 && i != 1) || a>=10) {
+		if ((a < 10 && i != 1) || a >= 10) {
 			mvaddstr(i, a, "*");
 			if (i == b) {
 				i = i + 10;
@@ -240,33 +255,33 @@ void Writingline1(int a, int b) {
 		}
 	}
 }
-//â°ñ_ÇÃï`âÊ
+//Ê®™Ê£í„ÅÆÊèèÁîª
 void Writingline2(int a, int b) {
 	int i, h, w;
 	getmaxyx(stdscr, h, w);
 	for (i = 0; i < w; i++) {
-		if ((i<10 && b!=1) || i>=10) {
+		if ((i < 10 && b != 1) || i >= 10) {
 			mvaddstr(b, i, "*");
 			if (i == a) {
 				i = i + 15;
 			}
 		}
-		
+
 	}
 }
 
 
 
 
-// É^ÉCÉgÉãÇï\é¶
+// „Çø„Ç§„Éà„É´„ÇíË°®Á§∫
 void Title()
 {
 	clear();
 	mvprintw(LINES / 2 - 4, (COLS - 70) / 2, " GGGG    AAA   M     M  EEEEE        SSSS   TTTTTTT   AAA   RRRR    TTTTTTT    ");
-	mvprintw(LINES / 2 - 3, (COLS - 70) / 2, "G    G  A   A  MM   MM  E           S    O     T     A   A  R   R      T");
+	mvprintw(LINES / 2 - 3, (COLS - 70) / 2, "G    G  A   A  MM   MM  E           S    S     T     A   A  R   R      T");
 	mvprintw(LINES / 2 - 2, (COLS - 70) / 2, "G       A   A  M M M M  E           S          T     A   A  R    R     T");
 	mvprintw(LINES / 2 - 1, (COLS - 70) / 2, "G       AAAAA  M  M  M  EEEEE       S          T     AAAAA  RRRRR      T");
-	mvprintw(LINES / 2, (COLS - 70) / 2,     "G       A   A  M     M  E            SSSSS     T     A   A  R  R       T");
+	mvprintw(LINES / 2, (COLS - 70) / 2, "G       A   A  M     M  E            SSSSS     T     A   A  R  R       T");
 	mvprintw(LINES / 2 + 1, (COLS - 70) / 2, "G   GGG A   A  M     M  E                 S    T     A   A  R   R      T");
 	mvprintw(LINES / 2 + 2, (COLS - 70) / 2, "G    G  A   A  M     M  E           S     S    T     A   A  R    R     T");
 	mvprintw(LINES / 2 + 3, (COLS - 70) / 2, " GGGG   A   A  M     M  EEEEE       SSSSSS     T     A   A  R     R    T");
@@ -277,7 +292,7 @@ void disOver() {
 	mvprintw(LINES / 2 - 3, (COLS - 70) / 2, "G    G  A   A  MM   MM  E           O    O  V     V  E      R   R      ");
 	mvprintw(LINES / 2 - 2, (COLS - 70) / 2, "G       A   A  M M M M  E           O    O  V     V  E      R    R     ");
 	mvprintw(LINES / 2 - 1, (COLS - 70) / 2, "G       AAAAA  M  M  M  EEEEE       O    O  V     V  EEEEE  RRRRR      ");
-	mvprintw(LINES / 2, (COLS - 70) / 2,     "G       A   A  M     M  E           O    O  V     V  E      R  R       ");
+	mvprintw(LINES / 2, (COLS - 70) / 2, "G       A   A  M     M  E           O    O  V     V  E      R  R       ");
 	mvprintw(LINES / 2 + 1, (COLS - 70) / 2, "G   GGG A   A  M     M  E           O    O   V   V   E      R   R      ");
 	mvprintw(LINES / 2 + 2, (COLS - 70) / 2, "G    G  A   A  M     M  E           O    O    V V    E      R    R     ");
 	mvprintw(LINES / 2 + 3, (COLS - 70) / 2, " GGGG   A   A  M     M  EEEEE        OOOO      V     EEEEE  R     R    ");
@@ -288,7 +303,7 @@ void disClear() {
 	mvprintw(LINES / 2 - 3, (COLS - 70) / 2, "G    G  A   A  MM   MM  E           c       L         E       A   A   R   R    ");
 	mvprintw(LINES / 2 - 2, (COLS - 70) / 2, "G       A   A  M M M M  E           c       L         E       A   A   R    R   ");
 	mvprintw(LINES / 2 - 1, (COLS - 70) / 2, "G       AAAAA  M  M  M  EEEEE       c       L         EEEEE   AAAAA   RRRRR    ");
-	mvprintw(LINES / 2, (COLS - 70) / 2,     "G       A   A  M     M  E           c       L         E       A   A   R   R    ");
+	mvprintw(LINES / 2, (COLS - 70) / 2, "G       A   A  M     M  E           c       L         E       A   A   R   R    ");
 	mvprintw(LINES / 2 + 1, (COLS - 70) / 2, "G   GGG A   A  M     M  E           c       L         E       A   A   R    R   ");
 	mvprintw(LINES / 2 + 2, (COLS - 70) / 2, "G    G  A   A  M     M  E           c       L         E       A   A   R     R  ");
 	mvprintw(LINES / 2 + 3, (COLS - 70) / 2, " GGGG   A   A  M     M  EEEEE        cccc   LLLLLLL   EEEEE   A   A   R      R ");
